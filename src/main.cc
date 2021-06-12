@@ -44,5 +44,7 @@ main(int argc, char *argv[])
       AST::junk::ass(x);
       delete x;
 
+      x4c::junk::thing::submain(argc, argv);
+
       return 0;
 }

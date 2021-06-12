@@ -61,6 +61,11 @@ class Expression
       explicit Expression(types type);
       virtual ~Expression() = default;
 
+      Expression(const Expression &o)            = delete;
+      Expression(Expression &&o)                 = delete;
+      Expression &operator=(const Expression &o) = delete;
+      Expression &operator=(Expression &&o)      = delete;
+
       void SetGroup(groups const group) { group_ = group; }
       void SetType(types const type) { type_ = type; }
 
@@ -104,9 +109,9 @@ class alignas(128) UnaryExpression : public Expression
       ~UnaryExpression() override;
       /* Just use a fucking pointer */
       UnaryExpression(const UnaryExpression &o)             = delete;
-      UnaryExpression(const UnaryExpression &&o)            = delete;
+      UnaryExpression(UnaryExpression &&o)                  = delete;
       UnaryExpression &operator=(const UnaryExpression &o)  = delete;
-      UnaryExpression &operator=(const UnaryExpression &&o) = delete;
+      UnaryExpression &operator=(UnaryExpression &&o)       = delete;
 };
 
 
@@ -128,9 +133,9 @@ class alignas(128) BinaryExpression : public Expression
       ~BinaryExpression() override;
       /* Just use a fucking pointer */
       BinaryExpression(const BinaryExpression &o)             = delete;
-      BinaryExpression(const BinaryExpression &&o)            = delete;
+      BinaryExpression(BinaryExpression &&o)                  = delete;
       BinaryExpression &operator=(const BinaryExpression &o)  = delete;
-      BinaryExpression &operator=(const BinaryExpression &&o) = delete;
+      BinaryExpression &operator=(BinaryExpression &&o)       = delete;
 };
 
 
@@ -152,15 +157,15 @@ class alignas(128) TerniaryExpression : public Expression
 
       ~TerniaryExpression() override;
       /* Just use a fucking pointer */
-      TerniaryExpression(const TerniaryExpression &o)             = delete;
-      TerniaryExpression(const TerniaryExpression &&o)            = delete;
-      TerniaryExpression &operator=(const TerniaryExpression &o)  = delete;
-      TerniaryExpression &operator=(const TerniaryExpression &&o) = delete;
+      TerniaryExpression(TerniaryExpression const &o)             = delete;
+      TerniaryExpression(TerniaryExpression &&o)                  = delete;
+      TerniaryExpression &operator=(TerniaryExpression const &o)  = delete;
+      TerniaryExpression &operator=(TerniaryExpression &&o)       = delete;
 };
 
 
 namespace junk {
-extern void ass(Expression * expr);
+extern void ass(Expression *expr);
 } // namespace junk
 
 /****************************************************************************************/

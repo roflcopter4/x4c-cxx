@@ -65,13 +65,17 @@ TerniaryExpression::~TerniaryExpression()
       delete if_false_;
 }
 
+/*--------------------------------------------------------------------------------------*/
+
+
+
 /*======================================================================================*/
 namespace junk {
 void
 ass(Expression *expr)
 {
-      auto *foo = reinterpret_cast<UnaryExpression *>(expr);
-      std::cout << foo->Repr() << foo->Type() << std::endl;
+      auto *foo = reinterpret_cast<BinaryExpression *>(expr);
+      std::cout << foo->Repr() << expr->Type() << std::endl;
 }
 } // namespace junk
 
