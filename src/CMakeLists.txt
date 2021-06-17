@@ -9,12 +9,17 @@ add_definitions(-D_BUILD_)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 set (x4c_SOURCES
     main.cc
-    junk/thingmain.cc
-    junk/num_grouping.c
+    config/get_ini.cc
+    config/ini_wrapper.cc
+    #junk/thingmain.cc
+    #junk/num_grouping.c
 
     translate/AST/expression.cc
     translate/AST/what_am_I_doing.cc
+    translate/AST/babbys_first_template.cc
 
+    translate/script_to_xml/listener.cc
+    translate/script_to_xml/visitor.cc
     translate/script_to_xml/util/string_tree.cc
 
     xml/doc_wrapper.cc
@@ -47,14 +52,16 @@ add_subdirectory(Gen)
 # add_subdirectory(xml)
 # add_subdirectory(config)
 
+add_dependencies(x4c_gen_headers antlr4_static)
 add_dependencies(x4c x4c_gen_headers)
-target_precompile_headers(x4c
-    # REUSE_FROM $<$<COMPILE_LANGUAGE:CXX>:x4c_parser>
-    REUSE_FROM x4c_parser
-)
+# target_precompile_headers(x4c
+#    REUSE_FROM x4c_parser
+# )
 
 ################################################################################
 # Libraries
+
+# target_compile_options(antlr4_static INTERFACE "${ALL_THE_CXX_FLAGS}")
 
 target_link_libraries(x4c
     # -static
@@ -64,16 +71,29 @@ target_link_libraries(x4c
     # -lxml2
     # -Wl,-Bstatic
     ${CMAKE_THREAD_LIBS_INIT}
-    ${IniParser_LIBRARIES}
-    fmt::fmt
-    -lxml2
+    #${IniParser_LIBRARIES}
+    #${LIBFMT_LIBRARIES}
+    #${LIBXML2_LIBRARIES}
+    #${LIBANTLR4_LIBRARIES}
+    #fmt::fmt
+    #-liniparser
+    #-lfmt
+    #-lxml2
     # /usr/local/lib64/libantlr4-runtime.a
     # -Wl,-Bstatic
     # -Wl,--no-whole-archive
-    -lantlr4-runtime
+    #-lantlr4-runtime
     # -Wl,-Bdynamic
     # /usr/lib/gcc/x86_64-pc-linux-gnu/11.1.0/libstdc++.a
     # /usr/lib/gcc/x86_64-pc-linux-gnu/11.1.0/libstdc++.a
+    
+    # D:/new_msys64/mingw64/lib/libiniparser.a
+    # -Wl,--no-whole-archive
+    antlr4_static
+    -lfmt
+    -lxml2
+    -liniparser4
+    # -lantlr4-runtime
 )
 
 if (MINGW)

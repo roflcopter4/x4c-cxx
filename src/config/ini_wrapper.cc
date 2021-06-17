@@ -2,6 +2,8 @@
 
 #include "ini_wrapper.hh"
 
+#include "config.hh"
+
 namespace x4c::config
 {
 /*--------------------------------------------------------------------------------------*/
@@ -16,7 +18,7 @@ ini_wrapper::ini_wrapper(string const &filename)
       if (!c_dict_)
             throw std::runtime_error("Failed to parse file \"" + filename_ + '"');
 
-
+      //map_ = std::move(get_config(this));
 }
 
 ini_wrapper::~ini_wrapper()
@@ -27,7 +29,7 @@ ini_wrapper::~ini_wrapper()
 /*--------------------------------------------------------------------------------------*/
 
 void
-ini_wrapper::dbg_dump(char const *fname)
+ini_wrapper::dbg_dump(char const *fname) const
 {
       FILE *fp = fopen(fname, "rb");
       assert(fp != nullptr);
@@ -36,13 +38,13 @@ ini_wrapper::dbg_dump(char const *fname)
 }
 
 void
-ini_wrapper::dbg_dump(FILE *fp)
+ini_wrapper::dbg_dump(FILE *fp) const
 {
       iniparser_dump(c_dict_, fp);
 }
 
 void
-ini_wrapper::write(string const &fname)
+ini_wrapper::write(string const &fname) const
 {
       FILE *fp = fopen(fname.c_str(), "wb");
       assert(fp != nullptr);
@@ -71,48 +73,47 @@ combine_section_and_key(char const *section, char const *key)
 }
 
 char const *
-ini_wrapper::get(char const *section, char const *key)
+ini_wrapper::get(char const *section, char const *key) const
 {
       char       *tmp = combine_section_and_key(section, key);
       char const *ret = get(tmp);
-      free(static_cast<void *>(tmp));
+      free(tmp);
       return ret;
 }
 
 char const *
-ini_wrapper::get(char const *key)
+ini_wrapper::get(char const *key) const
 {
       return dictionary_get(c_dict_, key, nullptr);
 }
 
 
 void
-ini_wrapper::set(char const *section, char const *key, char const *value)
+ini_wrapper::set(char const *section, char const *key, char const *value) const
 {
       char *tmp = combine_section_and_key(section, key);
       set(tmp, value);
-      free(static_cast<void *>(tmp));
+      free(tmp);
 }
 
 void
-ini_wrapper::set(char const *key, char const *value)
+ini_wrapper::set(char const *key, char const *value) const
 {
-      int ret = dictionary_set(c_dict_, key, value);
-      if (ret)
+      if (const int ret = dictionary_set(c_dict_, key, value); ret)
             throw std::runtime_error("Failed to set ini key:value pair.");
 }
 
 
 void
-ini_wrapper::unset(char const *section, char const *key)
+ini_wrapper::unset(char const *section, char const *key) const
 {
       char *tmp = combine_section_and_key(section, key);
       unset(tmp);
-      free(static_cast<void *>(tmp));
+      free(tmp);
 }
 
 void 
-ini_wrapper::unset(char const *key)
+ini_wrapper::unset(char const *key) const
 {
       dictionary_unset(c_dict_, key);
 }

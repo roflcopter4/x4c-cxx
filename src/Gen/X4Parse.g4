@@ -7,6 +7,7 @@ parser grammar X4Parse;
 //@members {
 //var x int
 //}
+#include <iostream>
 }
 
 
@@ -47,7 +48,7 @@ fileTypeStmt
 	;
 
 compoundStmt
-	: RBRACE pseudoStatement* LBRACE
+	: LBRACE pseudoStatement* RBRACE
 	;
 
 pseudoStatement
@@ -113,7 +114,7 @@ conditionStmt
 
 /* As a special case conditions will allow xml style statements for now. */
 conditionExpr
-	: RANGLE attributeList LANGLE
+	: LANGLE attributeList RANGLE
 	| LPAREN expression RPAREN
 	;
 
@@ -128,6 +129,16 @@ expressionList
 expression
 	: negationOp* unaryOp? subexpression
 	;
+
+//expression
+//	: negationOp expression # exprNegation
+//	| maybeUnaryExpression  # exprNEXT
+//	;
+//
+//maybeUnaryExpression
+//	: unaryOp subexpression # unaryExpression
+//	| subexpression         # unaryNEXT
+//	;
 
 subexpression
 	: Left=subexpression Op=powerOp          Right=expression  # subexprPower

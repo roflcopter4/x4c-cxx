@@ -1,3 +1,5 @@
+// ReSharper disable CppInconsistentNaming
+#pragma once
 #ifndef X4C_TRANSLATE_AST_AST_HH_
 #define X4C_TRANSLATE_AST_AST_HH_
 

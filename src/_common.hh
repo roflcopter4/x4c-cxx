@@ -1,4 +1,6 @@
 // ReSharper disable CppInconsistentNaming
+// ReSharper disable CppClangTidyBugproneReservedIdentifier
+#pragma once
 #ifndef TOP_COMMON_HH_
 #define TOP_COMMON_HH_
 /****************************************************************************************/
@@ -12,19 +14,15 @@
 #  define __has_include(x)
 #endif
 
-#if __cplusplus >= 201700L
+#if __cplusplus >= 201700L || defined _MSC_VER
 #  define UNUSED [[maybe_unused]]
 #else
 #  define UNUSED __attribute__((__unused__))
 #endif
-#if __cplusplus < 202002L
-# error "NO"
-#endif
 
 #ifdef _MSC_VER
-#  ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING 
-#    define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#  endif
+#  define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#  define _CRT_SECURE_NO_WARNINGS
 #endif
 #if defined _WIN32 || defined _WIN64
 #  define WIN32_LEAN_AND_MEAN
@@ -73,17 +71,19 @@
 #include <cstring>
 
 #if defined DOSISH
-#  include <Windows.h>
-#  include <io.h>
-#  include <winsock2.h>
+//#  include <Windows.h>
+//#  include <direct.h>
+//#  include <io.h>
+//#  include <winsock2.h>
+//#  include <afunix.h>
 #elif defined UNIXISH
-#  include <dirent.h>
-#  include <fcntl.h>
-#  include <spawn.h>
-#  include <sys/socket.h>
-#  include <sys/stat.h>
-#  include <sys/wait.h>
-#  include <unistd.h>
+//#  include <dirent.h>
+//#  include <fcntl.h>
+//#  include <spawn.h>
+//#  include <sys/socket.h>
+//#  include <sys/stat.h>
+//#  include <sys/wait.h>
+//#  include <unistd.h>
 #endif
 
 #include <fmt/core.h>

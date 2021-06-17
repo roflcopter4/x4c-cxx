@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 #include "Common.hh"
 
 #include "what_am_I_doing.hh"
@@ -9,13 +10,7 @@ string const emptystring{};
 /****************************************************************************************/
 namespace x4c::translate::AST {
 
-Expression::Expression(Expression::groups group, Expression::types type)
-{
-      group_ = group;
-      type_  = type;
-}
-
-Expression::Expression(Expression::types const type)
+Expression::Expression(types const type, string const &op)
 {
       switch ((type_ = type)) {
       case TYPES_UNARY_PREFIX_NEGATION:
@@ -40,9 +35,12 @@ Expression::Expression(Expression::types const type)
             group_ = GROUPS_TERNIARY;
             break;
       case TYPES_NIL:
+      default:
             group_ = GROUPS_NIL;
             break;
       }
+
+      op_ = op;
 }
 
 /*--------------------------------------------------------------------------------------*/
@@ -52,11 +50,15 @@ UnaryExpression::~UnaryExpression()
       delete expr_;
 }
 
+/*--------------------------------------------------------------------------------------*/
+
 BinaryExpression::~BinaryExpression()
 {
       delete left_;
       delete right_;
 }
+
+/*--------------------------------------------------------------------------------------*/
 
 TerniaryExpression::~TerniaryExpression()
 {
@@ -74,7 +76,7 @@ namespace junk {
 void
 ass(Expression *expr)
 {
-      auto *foo = reinterpret_cast<BinaryExpression *>(expr);
+      auto *foo = dynamic_cast<BinaryExpression *>(expr);
       std::cout << foo->Repr() << expr->Type() << std::endl;
 }
 } // namespace junk

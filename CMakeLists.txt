@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.20.2)
+cmake_minimum_required (VERSION 3.20.0)
 project (x4c C CXX)
 include (FindPkgConfig)
 include (CheckFunctionExists)
@@ -48,18 +48,37 @@ set (CMAKE_REQUIRED_DEFINITIONS -D__USE_ISOC99 -D__USE_ISOC11 -D__USE_ISOCXX11
 
 ###############################################################################
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 
+message("${CMAKE_MODULE_PATH}")
 find_package (Threads REQUIRED)
 find_package (IniParser REQUIRED)
 find_package (fmt REQUIRED)
+find_package (ANTLR)
 if (USE_JEMALLOC)
     find_package (Jemalloc REQUIRED)
 endif()
 
-include_directories("/usr/local/include/antlr4-runtime")
+if (MSVC)
+    option(LIBXML2_INCLUDE_DIRS CACHE)
+    option(LIBXML2_LIBRARIES CACHE)
+    option(LIBFMT_INCLUDE_DIRS CACHE)
+    option(LIBFMT_LIBRARIES CACHE)
+    option(LIBANTLR4_INCLUDE_DIRS CACHE)
+    option(LIBANTLR4_LIBRARIES CACHE)
+    FIX_WINDOWS_PATHS(LIBXML2_INCLUDE_DIRS)
+    FIX_WINDOWS_PATHS(LIBXML2_LIBRARIES)
+    FIX_WINDOWS_PATHS(LIBFMT_INCLUDE_DIRS)
+    FIX_WINDOWS_PATHS(LIBFMT_LIBRARIES)
+    FIX_WINDOWS_PATHS(LIBANTLR4_INCLUDE_DIRS)
+    FIX_WINDOWS_PATHS(LIBANTLR4_LIBRARIES)
+    
+    include_directories(${LIBFMT_INCLUDE_DIRS} ${LIBFMT_INCLUDE_DIRS} ${LIBANTLR4_INCLUDE_DIRS})
+else ()
+    # include_directories("/usr/local/include/antlr4-runtime")
+endif()
 
 ###############################################################################
 # Symbol and header checks
@@ -201,7 +220,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
          -Wattributes #-Wold-style-definition -Wold-style-declaration 
     )
     set (BASE ${BASE} ${WARNS} -fPIC -fpie
-        "-include ${CMAKE_SOURCE_DIR}/src/_common.hh"
+        # "-include ${CMAKE_SOURCE_DIR}/src/_common.hh"
     )
     set (LTO_STR "-flto")
 
@@ -220,35 +239,36 @@ if (MINGW)
     FIX_WINDOWS_PATHS(CMAKE_C_FLAGS)
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
-        ${CFLAGS_DEBUG_COMMON} ${BASE} ${CMAKE_C_FLAGS})
-set(CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO}
-        ${CFLAGS_RELWITHDEBINFO_COMMON} ${BASE} ${LTO_STR} ${CMAKE_C_FLAGS})
-set(CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}
-        ${CFLAGS_RELEASE_COMMON} ${BASE} ${LTO_STR} ${CMAKE_C_FLAGS})
-set(CMAKE_C_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL}
-        ${CFLAGS_RELEASE_COMMON} ${BASE} -Os -s ${CMAKE_C_FLAGS})
-   
-set(CMAKE_CXX_FLAGS -std=gnu++${CMAKE_CXX_STANDARD} ${CMAKE_CXX_FLAGS})
+if (NOT MSVC)
+    set(CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG}
+            ${CFLAGS_DEBUG_COMMON} ${BASE} ${CMAKE_C_FLAGS})
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO}
+            ${CFLAGS_RELWITHDEBINFO_COMMON} ${BASE} ${LTO_STR} ${CMAKE_C_FLAGS})
+    set(CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}
+            ${CFLAGS_RELEASE_COMMON} ${BASE} ${LTO_STR} ${CMAKE_C_FLAGS})
+    set(CMAKE_C_FLAGS_MINSIZEREL ${CMAKE_C_FLAGS_MINSIZEREL}
+            ${CFLAGS_RELEASE_COMMON} ${BASE} -Os -s ${CMAKE_C_FLAGS})
     
-set(CMAKE_CXX_FLAGS_DEBUG          ${CMAKE_C_FLAGS_DEBUG}          ${CMAKE_CXX_FLAGS})
-set(CMAKE_CXX_FLAGS_RELEASE        ${CMAKE_C_FLAGS_RELEASE}        ${CMAKE_CXX_FLAGS})
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS})
-set(CMAKE_CXX_FLAGS_MINSIZEREL     ${CMAKE_C_FLAGS_MINSIZEREL}     ${CMAKE_CXX_FLAGS})
-
-# string(TOUPPER ${CMAKE_BUILD_TYPE} _upper_CMAKE_BUILD_TYPE)
-# set (ALL_THE_C_FLAGS   ${CMAKE_C_FLAGS_${_upper_CMAKE_BUILD_TYPE}})
-# set (ALL_THE_CXX_FLAGS ${CMAKE_CXX_FLAGS_${_upper_CMAKE_BUILD_TYPE}})
-# message("THE FLAGS:\t\t\"${ALL_THE_CXX_FLAGS}\"")
-
-string(JOIN " " CMAKE_C_FLAGS_DEBUG             ${CMAKE_C_FLAGS_DEBUG})
-string(JOIN " " CMAKE_C_FLAGS_RELEASE           ${CMAKE_C_FLAGS_RELEASE})
-string(JOIN " " CMAKE_C_FLAGS_RELWITHDEBINFO    ${CMAKE_C_FLAGS_RELWITHDEBINFO})
-string(JOIN " " CMAKE_C_FLAGS_MINSIZEREL        ${CMAKE_C_FLAGS_MINSIZEREL})
-string(JOIN " " CMAKE_CXX_FLAGS_DEBUG           ${CMAKE_CXX_FLAGS_DEBUG})
-string(JOIN " " CMAKE_CXX_FLAGS_RELEASE         ${CMAKE_CXX_FLAGS_RELEASE})
-string(JOIN " " CMAKE_CXX_FLAGS_RELWITHDEBINFO  ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
-string(JOIN " " CMAKE_CXX_FLAGS_MINSIZEREL      ${CMAKE_CXX_FLAGS_MINSIZEREL})
+    string(JOIN " " CMAKE_CXX_FLAGS "-std=gnu++${CMAKE_CXX_STANDARD}" "${CMAKE_CXX_FLAGS}")
+        
+    set(CMAKE_CXX_FLAGS_DEBUG          ${CMAKE_C_FLAGS_DEBUG}          ${CMAKE_CXX_FLAGS})
+    set(CMAKE_CXX_FLAGS_RELEASE        ${CMAKE_C_FLAGS_RELEASE}        ${CMAKE_CXX_FLAGS})
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS})
+    set(CMAKE_CXX_FLAGS_MINSIZEREL     ${CMAKE_C_FLAGS_MINSIZEREL}     ${CMAKE_CXX_FLAGS})
+    
+    string(TOUPPER ${CMAKE_BUILD_TYPE} _upper_CMAKE_BUILD_TYPE)
+    set (ALL_THE_C_FLAGS   ${CMAKE_C_FLAGS_${_upper_CMAKE_BUILD_TYPE}})
+    set (ALL_THE_CXX_FLAGS ${CMAKE_CXX_FLAGS_${_upper_CMAKE_BUILD_TYPE}})
+    
+    string(JOIN " " CMAKE_C_FLAGS_DEBUG             ${CMAKE_C_FLAGS_DEBUG})
+    string(JOIN " " CMAKE_C_FLAGS_RELEASE           ${CMAKE_C_FLAGS_RELEASE})
+    string(JOIN " " CMAKE_C_FLAGS_RELWITHDEBINFO    ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+    string(JOIN " " CMAKE_C_FLAGS_MINSIZEREL        ${CMAKE_C_FLAGS_MINSIZEREL})
+    string(JOIN " " CMAKE_CXX_FLAGS_DEBUG           ${CMAKE_CXX_FLAGS_DEBUG})
+    string(JOIN " " CMAKE_CXX_FLAGS_RELEASE         ${CMAKE_CXX_FLAGS_RELEASE})
+    string(JOIN " " CMAKE_CXX_FLAGS_RELWITHDEBINFO  ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
+    string(JOIN " " CMAKE_CXX_FLAGS_MINSIZEREL      ${CMAKE_CXX_FLAGS_MINSIZEREL})
+endif()
 
 #####################################################################################################
 
@@ -256,5 +276,9 @@ configure_file(cmake-config.h.in config.h)
 
 include_directories(/usr/include/libxml2)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/Gen)
+
+set (CMAKE_POLICY_DEFAULT_CMP0114 OLD)
+include (ExternalAntlr4Cpp)
+include_directories(${ANTLR4_INCLUDE_DIRS})
 
 add_subdirectory(src)

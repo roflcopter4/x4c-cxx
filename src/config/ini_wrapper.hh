@@ -19,7 +19,7 @@ class ini_wrapper
       string filename_;
       dictionary *c_dict_;
 
-      std::map<string const &&, string const &&> map_;
+      //std::unique_ptr<std::map<string const, string const>> map_;
 
     public:
       explicit ini_wrapper(string const &filename);
@@ -33,20 +33,20 @@ class ini_wrapper
 
       ND string const & filename() const { return filename_; }
 
-      void dbg_dump(char const *fname);
-      void dbg_dump(FILE *fp = stderr);
+      void dbg_dump(char const *fname) const;
+      void dbg_dump(FILE *fp = stderr) const;
 
-      char const *get(char const *section, char const *key);
-      char const *get(char const *key);
+      char const *get(char const *section, char const *key) const;
+      char const *get(char const *key) const;
 
-      void set(char const *section, char const *key, char const *value);
-      void set(char const *key, char const *value);
+      void set(char const *section, char const *key, char const *value) const;
+      void set(char const *key, char const *value) const;
 
-      void unset(char const *section, char const *key);
-      void unset(char const *key);
+      void unset(char const *section, char const *key) const;
+      void unset(char const *key) const;
 
-      inline void write() { write(filename()); }
-      void write(string const &fname);
+      void write() const { write(filename()); }
+      void write(string const &fname) const;
 };
 
 } // namespace x4c::config

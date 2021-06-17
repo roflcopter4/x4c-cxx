@@ -17,10 +17,8 @@ extern string const emptystring;
 
 /*--------------------------------------------------------------------------------------*/
 
-/**
- * \brief I dunno like whatever or something I guess.
- */
-class alignas(64) Expression
+
+class Expression
 {
     public:
       enum groups {
@@ -53,17 +51,18 @@ class alignas(64) Expression
       };
 
     private:
-      alignas(16) string op_;
-      alignas(16) string raw_{};
-      alignas(16) groups group_; // = GROUPS_NIL;
-      alignas(16) types  type_;  // = TYPES_NIL;
+      unsigned precedence_{};
+      string   raw_{};
+      groups   group_; // = GROUPS_NIL;
+      types    type_;  // = TYPES_NIL;
 
     protected:
       void SetRaw(string const &raw) { raw_ = raw; }
       ND string const &Raw() const { return raw_; }
 
     public:
-      explicit Expression(types type = TYPES_NIL, string const &op = "");
+      explicit Expression(groups group = GROUPS_NIL, types type = TYPES_NIL);
+      explicit Expression(types type);
       virtual ~Expression() = default;
 
       Expression(Expression const &o)            = delete;
@@ -79,20 +78,22 @@ class alignas(64) Expression
 
       ND virtual string const &Repr() const    = 0;
       ND virtual string const &DumpStr() const = 0;
-      ND string const &op() const { return op_; }
 
       void DumpFile(std::ostream &stream = std::cout) const
       {
             stream << DumpStr() << std::endl;
       }
+
+
+
 };
 
+#if 0
 /*--------------------------------------------------------------------------------------*/
 
 class alignas(128) UnaryExpression : public Expression
 {
     private:
-      alignas(16)
       Expression *expr_{};
 
     public:
@@ -101,11 +102,11 @@ class alignas(128) UnaryExpression : public Expression
       ND string const &DumpStr() const override { return LAAZY(expr_, DumpStr); }
 #undef LAAZY
 
-      explicit UnaryExpression(types const type, string const &op = "") : Expression(type, op) {}
-
-      void set_expr(Expression *expr) { expr_ = expr; }
-      ND Expression *expr() const { return expr_; }
-      ND Expression **expr_ptr() { return &expr_; }
+      explicit UnaryExpression(types const type) : Expression(type) {}
+      explicit UnaryExpression(groups const group = GROUPS_NIL,
+                               types  const type  = TYPES_NIL)
+          : Expression(group, type)
+      {}
 
       ~UnaryExpression() override;
 
@@ -118,7 +119,7 @@ class alignas(128) UnaryExpression : public Expression
 
 /*--------------------------------------------------------------------------------------*/
 
-class BinaryExpression : public Expression
+class alignas(128) BinaryExpression : public Expression
 {
     private:
       Expression *left_{};
@@ -128,7 +129,11 @@ class BinaryExpression : public Expression
       ND string const &Repr()    const override { return util::emptystring; }
       ND string const &DumpStr() const override { return util::emptystring; }
 
-      explicit BinaryExpression(types const type, string const &op = "") : Expression(type, op) {}
+      explicit BinaryExpression(types const type) : Expression(type) {}
+      explicit BinaryExpression(groups const group = GROUPS_NIL,
+                                types  const type  = TYPES_NIL)
+          : Expression(group, type)
+      {}
 
       ~BinaryExpression() override;
 
@@ -137,12 +142,11 @@ class BinaryExpression : public Expression
       BinaryExpression(BinaryExpression &&o)                  = delete;
       BinaryExpression &operator=(const BinaryExpression &o)  = delete;
       BinaryExpression &operator=(BinaryExpression &&o)       = delete;
-
 };
 
 /*--------------------------------------------------------------------------------------*/
 
-class TerniaryExpression : public Expression
+class alignas(128) TerniaryExpression : public Expression
 {
     private:
       Expression *condition_{};
@@ -154,6 +158,10 @@ class TerniaryExpression : public Expression
       ND string const &DumpStr() const override { return util::emptystring; }
 
       explicit TerniaryExpression(types const type) : Expression(type) {}
+      explicit TerniaryExpression(groups const group = GROUPS_NIL,
+                                  types  const type  = TYPES_NIL)
+          : Expression(group, type)
+      {}
 
       ~TerniaryExpression() override;
 
@@ -162,7 +170,6 @@ class TerniaryExpression : public Expression
       TerniaryExpression(TerniaryExpression &&o)                 = delete;
       TerniaryExpression &operator=(TerniaryExpression const &o) = delete;
       TerniaryExpression &operator=(TerniaryExpression &&o)      = delete;
-
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -172,6 +179,7 @@ extern void ass(Expression *expr);
 } // namespace junk
 
 
+#endif
 /****************************************************************************************/
 } // namespace x4c::translate::AST
 #undef ND

@@ -1,7 +1,7 @@
 #include "Common.hh"
 #include "translate/script_to_xml/util/util.hh"
 
-namespace x4c::translate::script::util::myStringTree {
+namespace x4c::translate::script::util {
 
 using namespace antlr4;
 using namespace tree;
@@ -11,12 +11,58 @@ static string get_node_text(ParseTree *t, vector<string> const &rule_names);
 static string get_node_text(ParseTree *t);
 static string make_indent(int depth);
 
-constexpr static const char one_indent[3] = "  ";
+constexpr static char one_indent[3] = "  ";
+
+/*--------------------------------------------------------------------------------------*/
+
+#ifdef _WIN32
+static bool add_colour = true;
+
+HAX_INITIALIZER(watch_out_for_cmd_exe)
+{
+      auto *term = getenv("TERM");
+      add_colour = (term && strcmp(term, "mintty") == 0);
+}
+#else
+static constexpr bool add_colour = true;
+#endif
+
+static std::string
+escape_hitespace(std::string const &str, bool const escape_spaces)
+{
+      std::string result;
+      for (auto c : str) {
+            switch (c) {
+            case '\n':
+                  result += "\\n";
+                  break;
+
+            case '\r':
+                  result += "\\r";
+                  break;
+
+            case '\t':
+                  result += "\\t";
+                  break;
+
+            case ' ':
+                  if (escape_spaces) {
+                        result +=  "\u00B7";
+                        break;
+                  }
+                  // FALLTHROUGH
+            default:
+                  result += c;
+            }
+      }
+
+      return result;
+}
 
 /*--------------------------------------------------------------------------------------*/
 
 string
-to_string_tree(ParseTree *t, bool pretty)
+to_string_tree(ParseTree *t, bool const pretty)
 {
       return to_string_tree(t, nullptr, pretty);
 }
@@ -32,7 +78,7 @@ to_string_tree(ParseTree *t, Parser *recog, bool const pretty)
 string
 to_string_tree(ParseTree *t, vector<string> const &rule_names, bool const pretty)
 {
-      auto temp = antlrcpp::escapeWhitespace(get_node_text(t, rule_names), false);
+      auto temp = escape_hitespace(get_node_text(t, rule_names), false);
       if (t->children.empty())
             return temp;
 
@@ -50,7 +96,7 @@ to_string_tree(ParseTree *t, vector<string> const &rule_names, bool const pretty
                   ss << ' ';
 
             ParseTree *child = run->children[child_index];
-            temp = antlrcpp::escapeWhitespace(get_node_text(child, rule_names), false);
+            temp = escape_hitespace(get_node_text(child, rule_names), false);
 
             if (!child->children.empty()) {
                   // Go one level deeper.
@@ -122,9 +168,9 @@ recursive_method_impl(ParseTree *t, vector<string> const *const rule_names, bool
 static string
 recurse(int *depth, ParseTree *node, vector<string> const *rule_names, bool const pretty)
 {
-      string str = (rule_names)
-                       ? antlrcpp::escapeWhitespace(get_node_text(node, *rule_names), false)
-                       : antlrcpp::escapeWhitespace(get_node_text(node), false);
+      auto str = (rule_names)
+            ? escape_hitespace(get_node_text(node, *rule_names), false)
+            : escape_hitespace(get_node_text(node), false);
 
       if (node->children.empty())
             return str;
@@ -174,16 +220,23 @@ get_node_text(ParseTree *t, vector<string> const &rule_names)
                   ret = dynamic_cast<RuleContext *>(t)->getText();
             }
 
-            return "\033[0;36m" + ret + "\033[0m";
+            if (add_colour)
+                  return "\033[0;36m" + ret + "\033[0m";
+            return ret;
       }
 
-      if (antlrcpp::is<ErrorNode *>(t))
-            return "\033[1;31m" + t->toString() + "\033[0m";
+      if (antlrcpp::is<ErrorNode *>(t)) {
+            if (add_colour)
+                  return "\033[1;31m" + t->toString() + "\033[0m";
+            return t->toString();
+      }
 
       if (antlrcpp::is<TerminalNode *>(t)) {
-            Token *symbol = dynamic_cast<TerminalNode *>(t)->getSymbol();
-            if (symbol)
-                  return "\033[1;35m" + symbol->getText() + "\033[0m";
+            if (Token *symbol = dynamic_cast<TerminalNode *>(t)->getSymbol(); symbol) {
+                  if (add_colour)
+                        return "\033[1;35m" + symbol->getText() + "\033[0m";
+                  return symbol->getText();
+            }
       }
 
       return "";
@@ -212,4 +265,4 @@ make_indent(int depth)
       return ret;
 }
 
-} // namespace x4c::translate::script::util::myStringTree
+} // namespace x4c::translate::script::util

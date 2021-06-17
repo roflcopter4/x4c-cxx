@@ -10,12 +10,12 @@ namespace x4c::translate::AST::fuckme {
 
 using std::string;
 
-template <typename ty>
+template <typename Ty>
 class expression_impl;
 
 using Expression = expression_impl<int>;
 
-template <typename ty>
+template <typename Ty>
 class expression_impl
 {
     public:
@@ -57,13 +57,13 @@ class expression_impl
       string      operator_;
       enum groups group_ = EXPR_NIL;
       enum types  type_  = TYPES_NIL;
-      ty data_;
+      Ty data_;
 
       // ty          type_{};
 
     public:
       explicit expression_impl(enum types val) { type_ = val; }
-      ND ty &get() const { return data_; }
+      ND Ty &get() const { return data_; }
 };
 
 
