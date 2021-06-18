@@ -14,10 +14,12 @@
 #  define __has_include(x)
 #endif
 
-#if __cplusplus >= 201700L || defined _MSC_VER
+#if 0 && __cplusplus >= 201700L || defined _MSC_VER
 #  define UNUSED [[maybe_unused]]
+#  define NORETURN [[noreturn]]
 #else
 #  define UNUSED __attribute__((__unused__))
+#  define NORETURN __attribute__((__noreturn__))
 #endif
 
 #ifdef _MSC_VER

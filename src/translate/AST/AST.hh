@@ -1,7 +1,5 @@
 // ReSharper disable CppInconsistentNaming
 #pragma once
-#ifndef X4C_TRANSLATE_AST_AST_HH_
-#define X4C_TRANSLATE_AST_AST_HH_
 
 #include "Common.hh"
 
@@ -136,4 +134,3 @@ class UNARY_MINUS : public UnaryPrefix
 /****************************************************************************************/
 } // namespace x4c::translate::AST::Junk
 #undef ND
-#endif

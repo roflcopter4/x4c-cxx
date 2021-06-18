@@ -5,10 +5,9 @@
 #include "translate/script_to_xml/listener.hh"
 #include "translate/script_to_xml/util/util.hh"
 #include "translate/script_to_xml/visitor.hh"
-#include <cstddef>
 
 using antlr4::CommonTokenStream, antlr4::ANTLRInputStream;
-using lexer::X4Lex, parser::X4Parse;
+using x4c::gen::lexer::X4Lex, x4c::gen::parser::X4Parse;
 using x4c::translate::script::ParseVisitor;
 
 namespace script = x4c::translate::script;
@@ -16,37 +15,49 @@ namespace AST    = x4c::translate::AST;
 
 namespace cani {
 
-struct parse_wrapper {
-      std::string raw_input;
-      ANTLRInputStream  *stream;
-      CommonTokenStream *tokens;
-      X4Lex             *lex;
-      X4Parse           *parse;
-      //ParseVisitor      visitor;
-      //AST::Expression   *payload;
-      union {
-            X4Parse::DebugStatementContext *dbg;
-            X4Parse::DocumentContext       *doc;
-      } tree{};
+#define ND [[nodiscard]]
 
+class alignas(64) parse_wrapper
+{
+    private:
+      std::string        raw_input_;
+      ANTLRInputStream  *stream_;
+      CommonTokenStream *tokens_;
+      X4Lex             *lex_;
+      X4Parse           *parse_;
+
+    public:
       explicit parse_wrapper(std::string &&in) {
-            stream = new ANTLRInputStream(in);
-            lex    = new X4Lex(stream);
-            tokens = new CommonTokenStream(lex);
-            parse  = new X4Parse(tokens);
-            raw_input = std::move(in);
+            raw_input_ = std::move(in);
+            stream_    = new ANTLRInputStream(raw_input_);
+            lex_       = new X4Lex(stream_);
+            tokens_    = new CommonTokenStream(lex_);
+            parse_     = new X4Parse(tokens_);
       }
       explicit parse_wrapper(char const *in) : parse_wrapper(std::string(in)) {}
       explicit parse_wrapper(std::istream &instr)
           : parse_wrapper(std::string(std::istreambuf_iterator<char>{instr}, {})) {}
 
       ~parse_wrapper() {
-            delete stream;
-            delete tokens;
-            delete lex;
-            delete parse;
+            delete stream_;
+            delete tokens_;
+            delete lex_;
+            delete parse_;
       }
+
+      parse_wrapper(const parse_wrapper &o)            = delete;
+      parse_wrapper(parse_wrapper &&o)                 = delete;
+      parse_wrapper &operator=(const parse_wrapper &o) = delete;
+      parse_wrapper &operator=(parse_wrapper &&o)      = delete;
+
+      ND std::string const &raw()    const { return raw_input_; }
+      ND ANTLRInputStream  *stream() const { return stream_; }
+      ND CommonTokenStream *tokens() const { return tokens_; }
+      ND X4Lex             *lex()    const { return lex_; }
+      ND X4Parse           *parse()  const { return parse_; }
 };
+
+#undef ND
 
 static void do_something(char const *arg);
 static void do_something_else(char const *arg);
@@ -54,7 +65,9 @@ static void do_something_else(char const *arg);
 
 /*--------------------------------------------------------------------------------------*/
 
-namespace x4c::translate::AST::stupid { extern void helpme(); }
+namespace x4c::translate::AST::stupid {
+extern void helpme();
+} // namespace x4c::translate::AST::stupid
 
 int
 main(int argc, char *argv[])
@@ -75,15 +88,9 @@ main(int argc, char *argv[])
           ::AST::expression_impl<::AST::Binary>::TYPES_BINARY_POWER);
 #endif
 
-      auto *x = new AST::BinaryExpression(AST::Expression::TYPES_UNARY_POSTFIX_OP);
-      AST::junk::ass(x);
-      delete x;
-
       if (argc > 1)
-            cani::do_something_else(argv[1]);
-#if 0
             cani::do_something(argv[1]);
-#endif
+            //cani::do_something_else(argv[1]);
 
       // AST::stupid::helpme();
 
@@ -91,36 +98,37 @@ main(int argc, char *argv[])
 }
 
 namespace cani {
-static void
+UNUSED static void
 do_something(char const *const arg)
 {
-      auto p = std::make_unique<parse_wrapper>(arg);
-      auto *tree = p->parse->debugStatement();
-      fmt::print("{}\n", script::util::to_string_tree(tree, p->parse, true));
+      auto *p     = new parse_wrapper(arg);
+      auto *tree  = p->parse()->debugStatement();
+      auto *visit = new script::ParseVisitor(p->parse());
 
-      auto visit = script::ParseVisitor(p->parse);
-      visit.visitDebugStatement(tree);
+      fmt::print("{}\n", script::util::to_string_tree(tree, p->parse(), true));
+      visit->visitDebugStatement(tree);
 
-      auto pl = visit.payload();
-      
-      // std::cout << "Typeid: " << typeid(pl).name() << "\nBase typeid: " << typeid(pl.get()).name() << std::endl;
+      auto *pl = visit->payload().release();
+      std::cout << pl->Raw() << '\n';
 
-      auto *foo = dynamic_cast<AST::UnaryExpression *>(pl.release());
-      fmt::print("Op: {}\nExprOp: {}\n", foo->op(), foo->expr()->op());
-      delete foo;
+      delete p;
+      delete visit;
+
+      // auto *pl = dynamic_cast<AST::UnaryExpression *>(visit.payload().release());
+      // fmt::print("Op: {}\nExprOp: {}\n", pl->op(), pl->expr()->op());
+      // delete pl;
 }
 
 static void
 do_something_else(char const *arg)
 {
-      std::ifstream in(arg);
-      auto p = std::make_unique<parse_wrapper>(in);
+      auto in = std::ifstream(arg);
+      auto *p = new parse_wrapper(in);
       in.close();
 
-      std::cout << p->raw_input << std::endl;
-
-      auto *tree = p->parse->document();
-      std::cout << tree << std::endl;
+      std::cout << p->raw() << '\n';
+      auto *tree = p->parse()->document();
+      std::cout << tree << '\n';
 }
 
 } // namespace cani

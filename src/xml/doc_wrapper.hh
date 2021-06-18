@@ -1,6 +1,4 @@
 #pragma once
-#ifndef X4C_XML_DOC_WRAPPER_HH_
-#define X4C_XML_DOC_WRAPPER_HH_
 
 #include "Common.hh"
 #include <libxml/tree.h>
@@ -44,4 +42,3 @@ class doc_wrapper
 } // namespace x4c::XML
 
 #undef ND
-#endif /* doc_wrapper.hh */

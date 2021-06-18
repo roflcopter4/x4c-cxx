@@ -1,8 +1,7 @@
 #include "Common.hh"
 
-#include "ini_wrapper.hh"
-
-#include "config.hh"
+#include "config/config.hh"
+#include "config/ini_wrapper.hh"
 
 namespace x4c::config
 {

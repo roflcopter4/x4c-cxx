@@ -1,5 +1,4 @@
-#ifndef X4C_TRANSLATE_AST_EXPRESSION_HH_
-#define X4C_TRANSLATE_AST_EXPRESSION_HH_
+#pragma once
 
 #include "Common.hh"
 
@@ -104,4 +103,3 @@ class Terniary //: public expression_impl<enum terniary_types>
 /****************************************************************************************/
 } // namespace x4c::translate::AST::fuckme
 #undef ND
-#endif

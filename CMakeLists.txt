@@ -77,7 +77,7 @@ if (MSVC)
     
     include_directories(${LIBFMT_INCLUDE_DIRS} ${LIBFMT_INCLUDE_DIRS} ${LIBANTLR4_INCLUDE_DIRS})
 else ()
-    # include_directories("/usr/local/include/antlr4-runtime")
+    include_directories("/usr/local/include/antlr4-runtime")
 endif()
 
 ###############################################################################
@@ -277,8 +277,8 @@ configure_file(cmake-config.h.in config.h)
 include_directories(/usr/include/libxml2)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src/Gen)
 
-set (CMAKE_POLICY_DEFAULT_CMP0114 OLD)
-include (ExternalAntlr4Cpp)
-include_directories(${ANTLR4_INCLUDE_DIRS})
+# set (CMAKE_POLICY_DEFAULT_CMP0114 OLD)
+# include (ExternalAntlr4Cpp)
+# include_directories(${ANTLR4_INCLUDE_DIRS})
 
 add_subdirectory(src)

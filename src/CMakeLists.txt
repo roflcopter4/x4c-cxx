@@ -52,7 +52,7 @@ add_subdirectory(Gen)
 # add_subdirectory(xml)
 # add_subdirectory(config)
 
-add_dependencies(x4c_gen_headers antlr4_static)
+# add_dependencies(x4c_gen_headers antlr4_static)
 add_dependencies(x4c x4c_gen_headers)
 # target_precompile_headers(x4c
 #    REUSE_FROM x4c_parser
@@ -89,11 +89,11 @@ target_link_libraries(x4c
     
     # D:/new_msys64/mingw64/lib/libiniparser.a
     # -Wl,--no-whole-archive
-    antlr4_static
+    # antlr4_static
     -lfmt
     -lxml2
     -liniparser4
-    # -lantlr4-runtime
+    -lantlr4-runtime
 )
 
 if (MINGW)

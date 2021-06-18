@@ -1,6 +1,6 @@
 #include "Common.hh"
 
-#include "AST.hh"
+#include "translate/AST/AST.hh"
 
 namespace x4c::translate::AST::Junk {
 /****************************************************************************************/

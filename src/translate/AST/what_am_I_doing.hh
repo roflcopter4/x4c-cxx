@@ -1,7 +1,12 @@
 // ReSharper disable CppInconsistentNaming
-#pragma once
+#ifndef X4C_TRANSLATE_AST_WHATAMIDOING_HH_
+#define X4C_TRANSLATE_AST_WHATAMIDOING_HH_
 
 #include "Common.hh"
+
+namespace x4c::translate::script {
+class ParseVisitor;
+} // namespace x4c::translate::script
 
 #define ND [[nodiscard]]
 
@@ -20,7 +25,7 @@ extern string const emptystring;
 /**
  * \brief I dunno like whatever or something I guess.
  */
-class alignas(64) Expression
+class Expression
 {
     public:
       enum groups {
@@ -53,14 +58,12 @@ class alignas(64) Expression
       };
 
     private:
-      alignas(16) string op_;
-      alignas(16) string raw_{};
-      alignas(16) groups group_; // = GROUPS_NIL;
-      alignas(16) types  type_;  // = TYPES_NIL;
+      string op_;
+      string raw_{};
+      groups group_; // = GROUPS_NIL;
+      types  type_;  // = TYPES_NIL;
 
     protected:
-      void SetRaw(string const &raw) { raw_ = raw; }
-      ND string const &Raw() const { return raw_; }
 
     public:
       explicit Expression(types type = TYPES_NIL, string const &op = "");
@@ -71,6 +74,8 @@ class alignas(64) Expression
       Expression &operator=(Expression const &o) = delete;
       Expression &operator=(Expression &&o)      = delete;
 
+      void SetRaw(string const &raw) { raw_ = raw; }
+      ND string const &Raw() const { return raw_; }
       void SetGroup(groups const group) { group_ = group; }
       void SetType(types const type) { type_ = type; }
 
@@ -89,10 +94,16 @@ class alignas(64) Expression
 
 /*--------------------------------------------------------------------------------------*/
 
-class alignas(128) UnaryExpression : public Expression
+#define BOILERPLATE_EXPR(NAME)                              \
+      void set_##NAME(Expression *expr) { NAME##_ = expr; } \
+      ND Expression *NAME() const { return NAME##_; }       \
+      ND Expression **NAME##_ptr() { return &NAME##_; }
+
+template <auto foo> constexpr void set_thingy(Expression *expr) { foo = expr; }
+
+class UnaryExpression : public Expression
 {
     private:
-      alignas(16)
       Expression *expr_{};
 
     public:
@@ -102,11 +113,6 @@ class alignas(128) UnaryExpression : public Expression
 #undef LAAZY
 
       explicit UnaryExpression(types const type, string const &op = "") : Expression(type, op) {}
-
-      void set_expr(Expression *expr) { expr_ = expr; }
-      ND Expression *expr() const { return expr_; }
-      ND Expression **expr_ptr() { return &expr_; }
-
       ~UnaryExpression() override;
 
       /* Just use a fucking pointer */
@@ -114,6 +120,11 @@ class alignas(128) UnaryExpression : public Expression
       UnaryExpression(UnaryExpression &&o)                  = delete;
       UnaryExpression &operator=(const UnaryExpression &o)  = delete;
       UnaryExpression &operator=(UnaryExpression &&o)       = delete;
+
+      BOILERPLATE_EXPR(expr);
+      //void set_expr(Expression *expr) { expr_ = expr; }
+      //ND Expression *expr() const { return expr_; }
+      //ND Expression **expr_ptr() { return &expr_; }
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -124,12 +135,12 @@ class BinaryExpression : public Expression
       Expression *left_{};
       Expression *right_{};
 
+    protected:
     public:
       ND string const &Repr()    const override { return util::emptystring; }
       ND string const &DumpStr() const override { return util::emptystring; }
 
       explicit BinaryExpression(types const type, string const &op = "") : Expression(type, op) {}
-
       ~BinaryExpression() override;
 
       /* Just use a fucking pointer */
@@ -138,6 +149,16 @@ class BinaryExpression : public Expression
       BinaryExpression &operator=(const BinaryExpression &o)  = delete;
       BinaryExpression &operator=(BinaryExpression &&o)       = delete;
 
+      //void set_left(Expression *expr) { left_ = expr; }
+      //ND Expression *left() const { return left_; }
+      //ND Expression **left_ptr() { return &left_; }
+
+      //void set_right(Expression *expr) { right_ = expr; }
+      //ND Expression *right() const { return right_; }
+      //ND Expression **right_ptr() { return &right_; }
+
+      BOILERPLATE_EXPR(left);
+      BOILERPLATE_EXPR(right);
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -163,6 +184,9 @@ class TerniaryExpression : public Expression
       TerniaryExpression &operator=(TerniaryExpression const &o) = delete;
       TerniaryExpression &operator=(TerniaryExpression &&o)      = delete;
 
+      BOILERPLATE_EXPR(condition);
+      BOILERPLATE_EXPR(if_true);
+      BOILERPLATE_EXPR(if_false);
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -175,3 +199,4 @@ extern void ass(Expression *expr);
 /****************************************************************************************/
 } // namespace x4c::translate::AST
 #undef ND
+#endif

@@ -34,14 +34,14 @@ set (x4c_gen_ini_HEADERS "${CMAKE_CURRENT_BINARY_DIR}/ini/X4ConfigParser.h"
 
 ##########################################################################################
 
-macro (ADD_ANTLR4_COMMAND _packageName _antlrSource _visitor _listener _outputSRC _outputH)
+macro (ADD_ANTLR4_COMMAND _packageName _dirname _antlrSource _visitor _listener _outputSRC _outputH)
     add_custom_command(
         OUTPUT ${${_outputSRC}} ${${_outputH}}
         COMMAND antlr4 -Xexact-output-dir -Dlanguage=Cpp -long-messages
                 -package "${_packageName}"
                 $<IF:$<BOOL:${_visitor}>,-visitor,-no-visitor>
                 $<IF:$<BOOL:${_listener}>,-listener,-no-listener>
-                -o "${CMAKE_CURRENT_BINARY_DIR}/${_packageName}"
+                -o "${CMAKE_CURRENT_BINARY_DIR}/${_dirname}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/${_antlrSource}"
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${_antlrSource}"
@@ -71,8 +71,8 @@ endmacro()
 #    VERBATIM
 #)
 
-ADD_ANTLR4_COMMAND(lexer X4Lex.g4 FALSE FALSE x4c_gen_lexer_SOURCES x4c_gen_lexer_HEADERS)
-ADD_ANTLR4_COMMAND(parser X4Parse.g4 TRUE TRUE x4c_gen_parser_SOURCES x4c_gen_parser_HEADERS)
+ADD_ANTLR4_COMMAND(x4c::gen::lexer lexer X4Lex.g4 FALSE FALSE x4c_gen_lexer_SOURCES x4c_gen_lexer_HEADERS)
+ADD_ANTLR4_COMMAND(x4c::gen::parser parser X4Parse.g4 TRUE TRUE x4c_gen_parser_SOURCES x4c_gen_parser_HEADERS)
 # ADD_ANTLR4_COMMAND(ini X4Config.g4 FALSE FALSE x4c_gen_ini_SOURCES x4c_gen_ini_HEADERS)
 
 ##########################################################################################

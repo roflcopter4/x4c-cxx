@@ -1,5 +1,4 @@
-#ifndef CONFIG_WRAPPER_HH_
-#define CONFIG_WRAPPER_HH_
+#pragma once
 
 #include "Common.hh"
 #define ND [[nodiscard]]
@@ -52,4 +51,3 @@ class ini_wrapper
 } // namespace x4c::config
 
 #undef ND
-#endif /* ini_wrapper.hh */

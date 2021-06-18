@@ -24,4 +24,4 @@ get_reader(xmlDoc *doc)
         return ret;
 }
 
-} // namespace x4c::XML::util::intern
+} // namespace x4c::XML::util

@@ -12,13 +12,13 @@ class listener_data
 
 };
 
-class ParseListener: public parser::X4ParseBaseListener
+class ParseListener: public gen::parser::X4ParseBaseListener
 {
     private:
       AST::Expression *top;
       AST::Expression *parent;
       AST::Expression *current;
-      parser::X4Parse *parse;
+      gen::parser::X4Parse *parse;
 
       std::stack<bool> pop_current{};
 
@@ -26,7 +26,7 @@ class ParseListener: public parser::X4ParseBaseListener
       AST::Expression **want[3]{};
 
     public:
-      explicit ParseListener(parser::X4Parse *p);
+      explicit ParseListener(gen::parser::X4Parse *p);
       ~ParseListener() override;
 
       ParseListener(const ParseListener &o)            = delete;
@@ -36,8 +36,8 @@ class ParseListener: public parser::X4ParseBaseListener
 
       ND std::unique_ptr<AST::Expression> payload();
 
-      void enterExpression(parser::X4Parse::ExpressionContext *ctx) override;
-      void exitExpression(parser::X4Parse::ExpressionContext *ctx) override;
+      void enterExpression(gen::parser::X4Parse::ExpressionContext *ctx) override;
+      void exitExpression(gen::parser::X4Parse::ExpressionContext *ctx) override;
 };
 
 } // namespace x4c::translate::script

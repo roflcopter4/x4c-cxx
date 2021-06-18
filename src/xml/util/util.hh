@@ -1,5 +1,4 @@
-#ifndef X4C_XML_UTIL_UTIL_HH_
-#define X4C_XML_UTIL_UTIL_HH_
+#pragma once
 
 #include "Common.hh"
 
@@ -16,6 +15,3 @@ extern xmlDoc        *get_document(const char *fname);
 extern xmlTextReader *get_reader(xmlDoc *doc);
 
 } // namespace x4c::XML::util
-
-
-#endif

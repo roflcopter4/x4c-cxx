@@ -3,7 +3,7 @@
 
 namespace x4c::translate::script {
 
-using namespace parser;
+using x4c::gen::parser::X4Parse;
 
 void
 ParseListener::enterExpression(X4Parse::ExpressionContext *ctx)

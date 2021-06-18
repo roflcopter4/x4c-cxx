@@ -1,8 +1,8 @@
 // ReSharper disable CppInconsistentNaming
 
 #include "Common.hh"
-//#include "babbys_first_template.hh"
-#include "what_am_I_doing.hh"
+//#include "translate/AST/babbys_first_template.hh"
+#include "translate/AST/what_am_I_doing.hh"
 
 #include <type_traits>
 #include <typeindex>
